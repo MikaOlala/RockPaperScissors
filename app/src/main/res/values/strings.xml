@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SPS</string>
+    <string name="name_exists">На данный момент это имя уже занято</string>
+    <string name="name_not_exists">Комната не существует</string>
+</resources>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "797876208615",
+    "project_id": "rockpaperscissors-9aa46",
+    "storage_bucket": "rockpaperscissors-9aa46.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:797876208615:android:efed042e34f7cb29e7b342",
+        "android_client_info": {
+          "package_name": "com.mikaela.sps"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxwC52i5UCkrKAISDkKrntEFXp3SdF3j4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
