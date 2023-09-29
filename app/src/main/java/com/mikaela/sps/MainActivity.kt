@@ -1,5 +1,6 @@
 package com.mikaela.sps
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -35,10 +36,24 @@ class MainActivity : AppCompatActivity() {
         find.setOnClickListener {
             checkIfGameExist(input.text.toString(), false)
         }
+
+        if (Ius.readSharedPreferences(this, Ius.keySavedGame)!=Ius.noData)
+            enterGame()
     }
 
     private fun createGame() {
+        var room = Room(input.text.toString(), 0, 0, 0, Ius.choiceWaiting, Ius.choiceWaiting)
+        db.child(room.name).setValue(room).addOnSuccessListener {
+            Ius.writeSharedPreferencesObject(this, Ius.keySavedGame, room)
+            enterGame()
+        }.addOnFailureListener{
+            //TODO: make a toast
+        }
+    }
 
+    private fun enterGame() {
+        val intent = Intent()
+        startActivity(intent)
     }
 
     private fun checkIfGameExist(input: String, createGame: Boolean) {
@@ -50,6 +65,10 @@ class MainActivity : AppCompatActivity() {
                 if (createGame) {
                     warningInput.text = getString(R.string.name_exists)
                     warningInput.visibility = View.VISIBLE
+                }
+                else {
+                    Ius.writeSharedPreferencesObject(this@MainActivity, Ius.keySavedGame, snapshot.getValue<Room>())
+                    enterGame()
                 }
             }
 

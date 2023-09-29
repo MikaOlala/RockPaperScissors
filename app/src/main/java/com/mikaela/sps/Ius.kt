@@ -3,11 +3,8 @@ package com.mikaela.sps
 import android.app.Application
 import android.content.Context
 import android.widget.Toast
-import android.content.SharedPreferences
-import android.preference.PreferenceManager
-import com.mikaela.sps.Ius
+import androidx.preference.PreferenceManager
 import com.google.gson.Gson
-import com.mikaela.sps.Room
 
 class Ius : Application() {
     override fun onCreate() {
@@ -16,26 +13,32 @@ class Ius : Application() {
 
     companion object {
         const val noData = "noData"
+        const val keySavedGame = "savedGame"
+        const val choiceWaiting = "waiting"
+        const val choiceRock = "rock"
+        const val choicePaper = "paper"
+        const val choiceScissors = "scissors"
         private val toast: Toast? = null
-        fun writeSharedPreferences(context: Context?, key: String?, value: String?) {
+
+        fun writeSharedPreferences(context: Context, key: String, value: String) {
             val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
             val editor = sharedPreferences.edit()
             editor.putString(key, value)
             editor.apply()
         }
 
-        fun readSharedPreferences(context: Context?, key: String?): String? {
+        fun readSharedPreferences(context: Context, key: String): String? {
             val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
             return sharedPreferences.getString(key, noData)
         }
 
-        fun writeSharedPreferencesObject(context: Context?, key: String?, `object`: Any?) {
+        fun writeSharedPreferencesObject(context: Context, key: String, room: Room?) {
             val gson = Gson()
-            val json = gson.toJson(`object`)
+            val json = gson.toJson(room)
             writeSharedPreferences(context, key, json)
         }
 
-        fun getRoomFromPref(context: Context?, keyName: String?): Room? {
+        fun getRoomFromPref(context: Context, keyName: String): Room? {
             val json = readSharedPreferences(context, keyName)
             if (json == noData) return null
             val gson = Gson()
