@@ -28,7 +28,7 @@
                 android:id="@+id/score1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="score"/>
+                android:text="@string/score"/>
         </LinearLayout>
 
         <LinearLayout
@@ -39,6 +39,7 @@
             android:gravity="center">
 
             <ImageView
+                android:id="@+id/icon1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@android:drawable/sym_def_app_icon"/>
@@ -46,10 +47,10 @@
             <TextView
                 android:id="@+id/choice1"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Choice"/>
+                android:layout_height="wrap_content"/>
         </LinearLayout>
     </LinearLayout>
+
 
     <TextView
         android:id="@+id/roomName"
@@ -58,6 +59,7 @@
         android:text="RoomName"
         android:textSize="25sp"
         android:layout_gravity="center"/>
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -74,6 +76,7 @@
             android:gravity="center">
 
             <ImageView
+                android:id="@+id/icon2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@android:drawable/sym_def_app_icon"/>
@@ -81,8 +84,7 @@
             <TextView
                 android:id="@+id/choice2"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Choice"/>
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <LinearLayout

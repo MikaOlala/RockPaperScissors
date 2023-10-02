@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity() {
         var room = Room(input.text.toString(), 0, 0, 0, Ius.choiceWaiting, Ius.choiceWaiting)
         db.child(room.name).setValue(room).addOnSuccessListener {
             Ius.writeSharedPreferencesObject(this, Ius.keySavedGame, room)
+            Ius.writeSharedPreferences(this@MainActivity, Ius.keyIsMyGame, "true")
             enterGame()
         }.addOnFailureListener{
             //TODO: make a toast
@@ -68,6 +69,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 else {
                     Ius.writeSharedPreferencesObject(this@MainActivity, Ius.keySavedGame, snapshot.getValue<Room>())
+                    Ius.writeSharedPreferences(this@MainActivity, Ius.keyIsMyGame, "false")
                     enterGame()
                 }
             }

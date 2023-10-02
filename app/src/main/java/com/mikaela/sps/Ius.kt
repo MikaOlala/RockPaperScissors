@@ -1,7 +1,14 @@
 package com.mikaela.sps
 
 import android.app.Application
+import android.app.Dialog
 import android.content.Context
+import android.view.View
+import android.view.Window
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.preference.PreferenceManager
 import com.google.gson.Gson
@@ -14,7 +21,9 @@ class Ius : Application() {
     companion object {
         const val noData = "noData"
         const val keySavedGame = "savedGame"
+        const val keyIsMyGame = "IsMyGame"
         const val choiceWaiting = "waiting"
+        const val choiceWaitingForYou = "waiting for you"
         const val choiceRock = "rock"
         const val choicePaper = "paper"
         const val choiceScissors = "scissors"
@@ -43,6 +52,18 @@ class Ius : Application() {
             if (json == noData) return null
             val gson = Gson()
             return gson.fromJson(json, Room::class.java)
+        }
+
+        fun createDialog(context: Context): Dialog {
+            val dialog = Dialog(context)
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            dialog.window!!.setBackgroundDrawableResource(R.color.black_half_opacity)
+            dialog.setContentView(R.layout.dialog_choice)
+            dialog.setCancelable(true)
+            val back: ImageView = dialog.findViewById(R.id.back)
+            back.setOnClickListener { dialog.cancel() }
+
+            return dialog
         }
 
     //    public static void showToast(View layout, Context context, String text, boolean success) {
