@@ -8,22 +8,28 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import com.google.firebase.FirebaseApp
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.ktx.initialize
 
 class MainActivity : AppCompatActivity() {
 
-    private val db = Firebase.database.getReference("room")
+    private lateinit var db: DatabaseReference
     private lateinit var input: EditText
     private lateinit var warningInput: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        FirebaseApp.initializeApp(this)
+        db = Firebase.database.getReference("room")
+
         val find = findViewById<Button>(R.id.find)
         val create = findViewById<Button>(R.id.create)
         input = findViewById(R.id.input)
@@ -37,8 +43,9 @@ class MainActivity : AppCompatActivity() {
             checkIfGameExist(input.text.toString(), false)
         }
 
-        if (Ius.readSharedPreferences(this, Ius.keySavedGame)!=Ius.noData)
-            enterGame()
+        val savedGame: Room? = Ius.getRoomFromPref(this, Ius.keySavedGame)
+        if (savedGame!=null && savedGame.name.isNotEmpty())
+            checkIfGameExist(savedGame.name, false)
     }
 
     private fun createGame() {
@@ -53,36 +60,38 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun enterGame() {
-        val intent = Intent()
+        val intent = Intent(this, GameActivity::class.java)
         startActivity(intent)
     }
 
     private fun checkIfGameExist(input: String, createGame: Boolean) {
-        db.child(input).addValueEventListener(object: ValueEventListener {
+        db.child(input).addListenerForSingleValueEvent(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val value = snapshot.getValue<String>()
-                Log.d("checkIfGameExist", "Value is: ${value.toString()}")
+                val value = snapshot.getValue<Room>()
+                if (value==null && createGame) { // я создаю игру
+                    createGame()
+                    return
+                }
+                if (value==null) { // ищу игру и ее нет
+                    warningInput.text = getString(R.string.name_not_exists)
+                    warningInput.visibility = View.VISIBLE
+                    return
+                }
+                Log.d("checkIfGameExist", "Value is: $value")
 
-                if (createGame) {
+                if (createGame) { // создаю игру, имя занято
                     warningInput.text = getString(R.string.name_exists)
                     warningInput.visibility = View.VISIBLE
                 }
-                else {
-                    Ius.writeSharedPreferencesObject(this@MainActivity, Ius.keySavedGame, snapshot.getValue<Room>())
-                    Ius.writeSharedPreferences(this@MainActivity, Ius.keyIsMyGame, "false")
+                else { // нашел игру
+                    Ius.writeSharedPreferencesObject(this@MainActivity, Ius.keySavedGame, value)
                     enterGame()
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
                 Log.w("checkIfGameExist", "Failed to read value.", error.toException())
-
-                if (createGame)
-                    createGame()
-                else {
-                    warningInput.text = getString(R.string.name_not_exists)
-                    warningInput.visibility = View.VISIBLE
-                }
+                //TODO: toast smth went wrong
             }
         })
     }

@@ -1,5 +1,6 @@
 package com.mikaela.sps
 
+import android.R.attr.logo
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -14,6 +15,7 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
 
+
 class GameActivity : AppCompatActivity() {
     private var room: Room? = null
     private val db = Firebase.database.getReference("room")
@@ -21,8 +23,11 @@ class GameActivity : AppCompatActivity() {
     private lateinit var score: TextView
     private lateinit var choice1: TextView
     private lateinit var choice2: TextView
+    private lateinit var myIcon: ImageView
+    private lateinit var icon: ImageView
 
     private var isMyGame = false
+    private var choosingIsLocked = false
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,8 +37,6 @@ class GameActivity : AppCompatActivity() {
         val roomName: TextView = findViewById(R.id.roomName)
         val meText: TextView
         val enemyText: TextView
-        val myIcon: ImageView
-        val icon: ImageView
         choice1 = findViewById(R.id.choice1)
         choice2 = findViewById(R.id.choice2)
 
@@ -68,7 +71,8 @@ class GameActivity : AppCompatActivity() {
         refreshPoints()
 
         myIcon.setOnClickListener {
-            openDialogChoice()
+            if (!choosingIsLocked)
+                openDialogChoice()
         }
 
         listenGame()
@@ -78,8 +82,15 @@ class GameActivity : AppCompatActivity() {
         db.child(room!!.name).addValueEventListener(object: ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 var roomSnapshot = snapshot.getValue<Room>()
-                if (room==roomSnapshot)
+                if(roomSnapshot==null) {
+                    Log.i("listenGame onDataChange", "room is null")
+                    //TODO: toast
+                    return
+                }
+                if (room==roomSnapshot) {
                     Log.i("listenGame onDataChange", "objects are equal")
+                    return
+                }
 
                 room = roomSnapshot
                 refreshChoices()
@@ -148,10 +159,10 @@ class GameActivity : AppCompatActivity() {
         var first = room!!.choiceFirst
         var second = room!!.choiceSecond
 
-        if (first != Ius.choiceWaiting && second == Ius.choiceWaiting) {
+        if (!isMyGame && first != Ius.choiceWaiting && second == Ius.choiceWaiting) {
             choice1.text = Ius.choiceWaitingForYou
             return
-        } else if (first == Ius.choiceWaiting && second != Ius.choiceWaiting) {
+        } else if (isMyGame && first == Ius.choiceWaiting && second != Ius.choiceWaiting) {
             choice2.text = Ius.choiceWaitingForYou
             return
         }
@@ -161,19 +172,30 @@ class GameActivity : AppCompatActivity() {
             choice2.text = second
 
             whoWon(first, second)
+            room!!.choiceFirst = Ius.choiceWaiting
+            room!!.choiceSecond = Ius.choiceWaiting
             db.child(room!!.name).setValue(room).addOnFailureListener{
                 //TODO: toast smth went wrong
             }
         }
     }
 
+    @SuppressLint("DiscouragedApi")
     private fun setMyChoice(choice: String) {
-        if (isMyGame)
+        if (isMyGame) {
             room!!.choiceFirst = choice
-        else
+            choice1.text = choice
+        }
+        else {
             room!!.choiceSecond = choice
+            choice2.text = choice
+        }
+        db.child(room!!.name).setValue(room).addOnSuccessListener {
+            val resId = resources.getIdentifier(choice, "drawable", packageName)
+            myIcon.setImageResource(resId)
 
-        db.child(room!!.name).setValue(room).addOnFailureListener{
+
+        }.addOnFailureListener{
             //TODO: toast smth went wrong
         }
     }

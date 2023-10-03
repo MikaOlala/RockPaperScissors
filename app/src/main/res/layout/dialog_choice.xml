@@ -43,10 +43,9 @@
             android:gravity="center">
             <ImageView
                 android:id="@+id/rock"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/sym_def_app_icon"
-                />
+                android:layout_width="100sp"
+                android:layout_height="100sp"
+                android:src="@drawable/rock" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -63,9 +62,9 @@
             android:gravity="center">
             <ImageView
                 android:id="@+id/paper"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/sym_def_app_icon" />
+                android:layout_width="100sp"
+                android:layout_height="100sp"
+                android:src="@drawable/paper" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -81,9 +80,9 @@
             android:gravity="center">
             <ImageView
                 android:id="@+id/scissors"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/sym_def_app_icon" />
+                android:layout_width="100sp"
+                android:layout_height="100sp"
+                android:src="@drawable/scissors"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

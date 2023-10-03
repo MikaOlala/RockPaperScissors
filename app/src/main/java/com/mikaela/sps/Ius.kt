@@ -19,7 +19,7 @@ class Ius : Application() {
     }
 
     companion object {
-        const val noData = "noData"
+        const val noData = "null"
         const val keySavedGame = "savedGame"
         const val keyIsMyGame = "IsMyGame"
         const val choiceWaiting = "waiting"
@@ -55,7 +55,7 @@ class Ius : Application() {
         }
 
         fun createDialog(context: Context): Dialog {
-            val dialog = Dialog(context)
+            val dialog = Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
             dialog.window!!.setBackgroundDrawableResource(R.color.black_half_opacity)
             dialog.setContentView(R.layout.dialog_choice)
