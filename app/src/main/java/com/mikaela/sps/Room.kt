@@ -6,8 +6,8 @@ class Room {
     var scoreFirst: Int = 0
     var scoreSecond: Int = 0
     var scoreDraw: Int = 0
-    var choiceFirst: String = Ius.choiceWaiting
-    var choiceSecond: String = Ius.choiceWaiting
+    var choiceFirst: String = Ius.statusOffline
+    var choiceSecond: String = Ius.statusOffline
 
     constructor(
         name: String,
@@ -26,6 +26,31 @@ class Room {
     }
 
     constructor()
+
+    fun setMyChoice(newChoice: String, isMyGame: Boolean) {
+        if (isMyGame)
+            this.choiceFirst = newChoice
+        else
+            this.choiceSecond = newChoice
+    }
+    fun getMyChoice(isMyGame: Boolean): String{
+        return if (isMyGame)
+            choiceFirst
+        else
+            choiceSecond
+    }
+    fun setEnemyChoice(newChoice: String, isMyGame: Boolean) {
+        if (isMyGame)
+            this.choiceSecond = newChoice
+        else
+            this.choiceFirst = newChoice
+    }
+    fun getEnemyChoice(isMyGame: Boolean): String{
+        return if (isMyGame)
+            choiceSecond
+        else
+            choiceFirst
+    }
 
 }
 

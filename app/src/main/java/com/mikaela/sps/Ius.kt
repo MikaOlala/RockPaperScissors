@@ -22,11 +22,13 @@ class Ius : Application() {
         const val noData = "null"
         const val keySavedGame = "savedGame"
         const val keyIsMyGame = "IsMyGame"
-        const val choiceWaiting = "waiting"
-        const val choiceWaitingForYou = "waiting for you"
-        const val choiceRock = "rock"
-        const val choicePaper = "paper"
-        const val choiceScissors = "scissors"
+
+        const val statusOffline = "not in game"
+        const val statusChoosing = "choosing"
+        const val statusWaitingForYou = "waiting for you"
+        const val statusRock = "rock"
+        const val statusPaper = "paper"
+        const val statusScissors = "scissors"
         private val toast: Toast? = null
 
         fun writeSharedPreferences(context: Context, key: String, value: String) {

@@ -36,11 +36,13 @@ class MainActivity : AppCompatActivity() {
         warningInput = findViewById(R.id.warning)
 
         create.setOnClickListener{
-            checkIfGameExist(input.text.toString(), true)
+            if (input.text.isNotEmpty())
+                checkIfGameExist(input.text.toString(), true)
         }
 
         find.setOnClickListener {
-            checkIfGameExist(input.text.toString(), false)
+            if (input.text.isNotEmpty())
+                checkIfGameExist(input.text.toString(), false)
         }
 
         val savedGame: Room? = Ius.getRoomFromPref(this, Ius.keySavedGame)
@@ -49,7 +51,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createGame() {
-        var room = Room(input.text.toString(), 0, 0, 0, Ius.choiceWaiting, Ius.choiceWaiting)
+        var room = Room(input.text.toString(), 0, 0, 0, Ius.statusOffline, Ius.statusOffline)
         db.child(room.name).setValue(room).addOnSuccessListener {
             Ius.writeSharedPreferencesObject(this, Ius.keySavedGame, room)
             Ius.writeSharedPreferences(this@MainActivity, Ius.keyIsMyGame, "true")
@@ -60,6 +62,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun enterGame() {
+        warningInput.text = ""
         val intent = Intent(this, GameActivity::class.java)
         startActivity(intent)
     }

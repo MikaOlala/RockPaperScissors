@@ -21,15 +21,19 @@ class GameActivity : AppCompatActivity() {
     private val db = Firebase.database.getReference("room")
     private lateinit var myScore: TextView
     private lateinit var score: TextView
+
     private lateinit var choice1: TextView
     private lateinit var choice2: TextView
+    private lateinit var myChoice: TextView
+    private lateinit var enemyChoice: TextView
+
     private lateinit var myIcon: ImageView
     private lateinit var icon: ImageView
 
     private var isMyGame = false
     private var choosingIsLocked = false
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "CutPasteId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
@@ -56,6 +60,8 @@ class GameActivity : AppCompatActivity() {
             enemyText = findViewById(R.id.player2)
             myIcon = findViewById(R.id.icon1)
             icon = findViewById(R.id.icon2)
+            myChoice = findViewById(R.id.choice1)
+            enemyChoice = findViewById(R.id.choice2)
         }
         else {
             myScore = findViewById(R.id.score2)
@@ -64,6 +70,8 @@ class GameActivity : AppCompatActivity() {
             enemyText = findViewById(R.id.player1)
             myIcon = findViewById(R.id.icon2)
             icon = findViewById(R.id.icon1)
+            myChoice = findViewById(R.id.choice2)
+            enemyChoice = findViewById(R.id.choice1)
         }
 
         meText.text = getString(R.string.you)
@@ -75,6 +83,7 @@ class GameActivity : AppCompatActivity() {
                 openDialogChoice()
         }
 
+        changeOnline(true)
         listenGame()
     }
 
@@ -108,7 +117,6 @@ class GameActivity : AppCompatActivity() {
                     }
                 }.start()
             }
-
         })
     }
 
@@ -130,7 +138,7 @@ class GameActivity : AppCompatActivity() {
                 //TODO: change image to custom
             }
 
-            setMyChoice(Ius.choiceRock)
+            setMyChoice(Ius.statusRock)
             dialog.cancel()
         }
 
@@ -139,7 +147,7 @@ class GameActivity : AppCompatActivity() {
                 //TODO: change image to custom
             }
 
-            setMyChoice(Ius.choicePaper)
+            setMyChoice(Ius.statusPaper)
             dialog.cancel()
         }
 
@@ -148,7 +156,7 @@ class GameActivity : AppCompatActivity() {
                 //TODO: change image to custom
             }
 
-            setMyChoice(Ius.choiceScissors)
+            setMyChoice(Ius.statusScissors)
             dialog.cancel()
         }
 
@@ -156,27 +164,36 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun refreshChoices() {
-        var first = room!!.choiceFirst
-        var second = room!!.choiceSecond
+        val first = room!!.choiceFirst
+        val second = room!!.choiceSecond
 
-        if (!isMyGame && first != Ius.choiceWaiting && second == Ius.choiceWaiting) {
-            choice1.text = Ius.choiceWaitingForYou
+        if (!isMyGame && isRockPaperScissors(first) && !isRockPaperScissors(second)) {
+            choice1.text = Ius.statusWaitingForYou
             return
-        } else if (isMyGame && first == Ius.choiceWaiting && second != Ius.choiceWaiting) {
-            choice2.text = Ius.choiceWaitingForYou
+        } else if (isMyGame && !isRockPaperScissors(first) && isRockPaperScissors(second)) {
+            choice2.text = Ius.statusWaitingForYou
             return
         }
 
-        if (first != Ius.choiceWaiting && second != Ius.choiceWaiting) {
+        if (isRockPaperScissors(first) && isRockPaperScissors(second)) {
             choice1.text = first
             choice2.text = second
 
             whoWon(first, second)
-            room!!.choiceFirst = Ius.choiceWaiting
-            room!!.choiceSecond = Ius.choiceWaiting
             db.child(room!!.name).setValue(room).addOnFailureListener{
                 //TODO: toast smth went wrong
             }
+
+            object : CountDownTimer(3000, 3000) {
+                override fun onTick(millisUntilFinished: Long) {}
+                override fun onFinish() {
+                    room!!.choiceFirst = Ius.statusChoosing
+                    room!!.choiceSecond = Ius.statusChoosing
+                    db.child(room!!.name).setValue(room).addOnFailureListener{
+                        //TODO: toast smth went wrong
+                    }
+                }
+            }.start()
         }
     }
 
@@ -223,25 +240,47 @@ class GameActivity : AppCompatActivity() {
         if (first == second) {
             room!!.scoreDraw = room!!.scoreDraw + 1
         }
-        else if(first==Ius.choiceRock && second==Ius.choicePaper) {
+        else if(first==Ius.statusRock && second==Ius.statusPaper) {
             addPointsToSecond()
         }
-        else if (first == Ius.choiceRock && second == Ius.choiceScissors) {
+        else if (first == Ius.statusRock && second == Ius.statusScissors) {
             addPointsToFirst()
         }
 
-        else if (first == Ius.choicePaper && second == Ius.choiceScissors) {
+        else if (first == Ius.statusPaper && second == Ius.statusScissors) {
             addPointsToSecond()
         }
-        else if (first == Ius.choicePaper && second == Ius.choiceRock) {
+        else if (first == Ius.statusPaper && second == Ius.statusRock) {
             addPointsToFirst()
         }
 
-        else if (first == Ius.choiceScissors && second == Ius.choiceRock) {
+        else if (first == Ius.statusScissors && second == Ius.statusRock) {
             addPointsToSecond()
         }
-        else if (first == Ius.choiceScissors && second == Ius.choicePaper) {
+        else if (first == Ius.statusScissors && second == Ius.statusPaper) {
             addPointsToFirst()
         }
+    }
+
+    private fun isRockPaperScissors(choice: String):Boolean {
+        return choice==Ius.statusRock || choice==Ius.statusPaper || choice==Ius.statusScissors
+    }
+
+    private fun changeOnline(online: Boolean){
+        if (online && room!!.getMyChoice(isMyGame)==Ius.statusOffline) {
+            room!!.setMyChoice(Ius.statusChoosing, isMyGame)
+            db.child(room!!.name).setValue(room)
+            return
+        }
+
+        if (room!!.getMyChoice(isMyGame)!=Ius.statusOffline) {
+            room!!.setMyChoice(Ius.statusOffline, isMyGame)
+            db.child(room!!.name).setValue(room)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        changeOnline(false)
     }
 }
