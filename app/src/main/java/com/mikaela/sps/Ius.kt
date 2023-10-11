@@ -1,5 +1,6 @@
 package com.mikaela.sps
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.app.Dialog
 import android.content.Context
@@ -12,6 +13,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.preference.PreferenceManager
 import com.google.gson.Gson
+import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 class Ius : Application() {
     override fun onCreate() {
@@ -21,14 +25,18 @@ class Ius : Application() {
     companion object {
         const val noData = "null"
         const val keySavedGame = "savedGame"
+        const val keyMe = "keyMe"
         const val keyIsMyGame = "IsMyGame"
+        const val keyId = "keyId"
+        const val standardPattern = "dd.MM.yyyy"
+        const val codePattern = "ddMMyyyy-hhmmss"
 
         const val statusOffline = "not in game"
         const val statusChoosing = "choosing"
         const val statusWaitingForYou = "waiting for you"
-        const val statusRock = "rock"
-        const val statusPaper = "paper"
-        const val statusScissors = "scissors"
+        const val choiceRock = "rock"
+        const val choicePaper = "paper"
+        const val choiceScissors = "scissors"
         private val toast: Toast? = null
 
         fun writeSharedPreferences(context: Context, key: String, value: String) {
@@ -43,9 +51,9 @@ class Ius : Application() {
             return sharedPreferences.getString(key, noData)
         }
 
-        fun writeSharedPreferencesObject(context: Context, key: String, room: Room?) {
+        fun writeSharedPreferencesObject(context: Context, key: String, objects: Any) {
             val gson = Gson()
-            val json = gson.toJson(room)
+            val json = gson.toJson(objects)
             writeSharedPreferences(context, key, json)
         }
 
@@ -54,6 +62,13 @@ class Ius : Application() {
             if (json == noData) return null
             val gson = Gson()
             return gson.fromJson(json, Room::class.java)
+        }
+
+        fun getPlayerFromPref(context: Context, keyName: String): Player? {
+            val json = readSharedPreferences(context, keyName)
+            if (json == noData) return null
+            val gson = Gson()
+            return gson.fromJson(json, Player::class.java)
         }
 
         fun createDialog(context: Context): Dialog {
@@ -66,6 +81,12 @@ class Ius : Application() {
             back.setOnClickListener { dialog.cancel() }
 
             return dialog
+        }
+
+        @SuppressLint("SimpleDateFormat")
+        fun getDateString(date: Date, pattern: String): String {
+            val formatter = SimpleDateFormat(pattern)
+            return formatter.format(date)
         }
 
     //    public static void showToast(View layout, Context context, String text, boolean success) {

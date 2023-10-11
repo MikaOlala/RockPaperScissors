@@ -20,12 +20,12 @@
             android:orientation="vertical"
             android:gravity="center">
             <TextView
-                android:id="@+id/player1"
+                android:id="@+id/player2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Player 1" />
+                android:text="@string/enemy" />
             <TextView
-                android:id="@+id/score1"
+                android:id="@+id/score2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/score"/>
@@ -39,13 +39,13 @@
             android:gravity="center">
 
             <ImageView
-                android:id="@+id/icon1"
+                android:id="@+id/icon2"
                 android:layout_width="150sp"
                 android:layout_height="150sp"
                 android:src="@drawable/play"/>
 
             <TextView
-                android:id="@+id/choice1"
+                android:id="@+id/choice2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
         </LinearLayout>
@@ -76,13 +76,13 @@
             android:gravity="center">
 
             <ImageView
-                android:id="@+id/icon2"
+                android:id="@+id/icon1"
                 android:layout_width="150sp"
                 android:layout_height="150sp"
                 android:src="@drawable/play"/>
 
             <TextView
-                android:id="@+id/choice2"
+                android:id="@+id/choice1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
         </LinearLayout>
@@ -93,12 +93,12 @@
             android:orientation="vertical"
             android:gravity="center">
             <TextView
-                android:id="@+id/player2"
+                android:id="@+id/player1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Player 2" />
+                android:text="@string/you" />
             <TextView
-                android:id="@+id/score2"
+                android:id="@+id/score1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="score"/>
