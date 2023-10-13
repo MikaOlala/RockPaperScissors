@@ -31,9 +31,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         FirebaseApp.initializeApp(this)
-        db = Firebase.database.getReference("players")
-        dbRoom = Firebase.database.getReference("rooms")
 
+        dbRoom = Firebase.database.getReference("rooms")
+        db = Firebase.database.getReference("players")
         val find = findViewById<Button>(R.id.find)
         val create = findViewById<Button>(R.id.create)
         input = findViewById(R.id.input)
@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity() {
                     warningInput.text = getString(R.string.name_exists)
                     warningInput.visibility = View.VISIBLE
                 }
-                else if (me!!.id==value.idSecond) { // нашел игру
+                else if (me!!.id==value.idSecond || value.idSecond.isEmpty()) { // нашел игру
                     me!!.gameConnectedTo = input
                     value.idSecond = me!!.id
 
@@ -115,7 +115,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateData(room: Room) {
         db.child(me!!.id).setValue(me).addOnSuccessListener {
-            db.child(room.name).setValue(room).addOnSuccessListener {
+            dbRoom.child(room.name).setValue(room).addOnSuccessListener {
+                Ius.writeSharedPreferencesObject(this, Ius.keyMe, me!!)
                 enterGame()
             }
         }
@@ -126,12 +127,13 @@ class MainActivity : AppCompatActivity() {
         val myData = Player("" + randomNumber.nextInt(99999) + "-" + Ius.getDateString(Date(), Ius.codePattern),
                         0, Ius.statusChoosing, false, "", false,
                     "", Ius.getDateString(Date(), Ius.standardPattern), "", "", "")
+        me = myData
 
-        db.setValue(me).addOnSuccessListener {
-            me = myData
+        db.child(me!!.id).setValue(me).addOnSuccessListener {
             Ius.writeSharedPreferencesObject(this, Ius.keyMe, me!!)
         }.addOnFailureListener{
             //TODO: toast
+            Log.e("setValue me", "Failed")
         }
     }
 }

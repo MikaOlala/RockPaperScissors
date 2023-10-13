@@ -21,13 +21,12 @@ class GameActivity : AppCompatActivity() {
     private var enemy: Player? = null
     private var myId: String = ""
     private var enemyId: String = ""
+    private var choiceIsLocked = false
     private val db = Firebase.database.getReference("players")
     private val dbRoom = Firebase.database.getReference("rooms")
 
     private lateinit var myScore: TextView
     private lateinit var score: TextView
-    private lateinit var choice1: TextView
-    private lateinit var choice2: TextView
     private lateinit var myChoice: TextView
     private lateinit var choice: TextView
     private lateinit var myIcon: ImageView
@@ -40,8 +39,12 @@ class GameActivity : AppCompatActivity() {
         setContentView(R.layout.activity_game)
 
         val roomName: TextView = findViewById(R.id.roomName)
-        choice1 = findViewById(R.id.choice1)
-        choice2 = findViewById(R.id.choice2)
+        myScore = findViewById(R.id.score1)
+        score = findViewById(R.id.score2)
+        myIcon = findViewById(R.id.icon1)
+        icon = findViewById(R.id.icon2)
+        myChoice = findViewById(R.id.choice1)
+        choice = findViewById(R.id.choice2)
 
         me = Ius.getPlayerFromPref(this, Ius.keyMe)
         if (me == null) {
@@ -52,17 +55,15 @@ class GameActivity : AppCompatActivity() {
         roomName.text = me!!.gameConnectedTo
         myId = me!!.id
 
-        myScore = findViewById(R.id.score1)
-        score = findViewById(R.id.score2)
-        myIcon = findViewById(R.id.icon1)
-        icon = findViewById(R.id.icon2)
-        myChoice = findViewById(R.id.choice1)
-        choice = findViewById(R.id.choice2)
-
         myIcon.setOnClickListener {
-            openDialogChoice()
+            if (enemy!=null && !choiceIsLocked)
+                openDialogChoice()
         }
 
+        waitingForEnemy()
+    }
+
+    private fun startWork() {
         changeOnline(true)
         listenMyself()
         listenEnemy()
@@ -160,6 +161,7 @@ class GameActivity : AppCompatActivity() {
 
     @SuppressLint("DiscouragedApi")
     private fun setMyChoice(choice: String) {
+        choiceIsLocked = true
         me!!.choice = choice
         setIcon(myIcon, choice)
 
@@ -167,6 +169,10 @@ class GameActivity : AppCompatActivity() {
             whoWon(me!!.choice, enemy!!.choice)
 
         //TODO: add animation loader
+        refreshDataOnDB()
+    }
+
+    private fun refreshDataOnDB() {
         db.child(myId).setValue(me).addOnSuccessListener {
             refreshUi()
             db.child(enemyId).setValue(enemy)
@@ -199,6 +205,17 @@ class GameActivity : AppCompatActivity() {
         if (second!=Ius.statusChoosing && first!=Ius.statusChoosing) {
             setIcon(myIcon, first)
             setIcon(icon, second)
+
+            object : CountDownTimer(2000, 1000) {
+                override fun onTick(p0: Long) {}
+
+                override fun onFinish() {
+                    choiceIsLocked = false
+                    me!!.choice = Ius.statusChoosing
+                    enemy!!.choice = Ius.statusChoosing
+                    refreshDataOnDB()
+                }
+            }
         }
         else if (second==Ius.statusChoosing && first==Ius.statusChoosing) {
             setIcon(myIcon, "play")
@@ -242,8 +259,33 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    private fun isRockPaperScissors(choice: String):Boolean {
-        return choice==Ius.choiceRock || choice==Ius.choicePaper || choice==Ius.choiceScissors
+    private fun waitingForEnemy() {
+        dbRoom.child(me!!.gameConnectedTo).addValueEventListener(object: ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                var room = snapshot.getValue<Room>()
+                if (room==null) {
+                    Log.e("waitingForEnemy", "value is null")
+                }
+                enemyId = if (me!!.gameOwner)
+                    room!!.idSecond
+                else
+                    room!!.idFirst
+
+                if (enemyId.isEmpty()){
+                    Log.e("waitingForEnemy", "value is isEmpty")
+                    choice.text = getString(R.string.no_enemy)
+                    return
+                }
+
+                dbRoom.removeEventListener(this)
+                startWork()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+                Log.e("waitingForEnemy", "onCancelled")
+            }
+        })
     }
 
     private fun changeOnline(makeOnline: Boolean){
